@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 
 // Define the API endpoint URL for your Python backend
 // This should be the address where your Flask app is running
-const API_BASE_URL = 'http://127.0.0.1:5000/api/reservations';
+const API_BASE_URL = 'https://hotel-reservation-system-backend-aeqb.onrender.com/api/reservations';
 
 const App = () => {
     // Reservation state variables
