@@ -89,7 +89,7 @@ const App = () => {
 
         } catch (e) {
             console.error("Error creating reservation:", e);
-            setErrorMessage(e.error)
+            setErrorMessage(e.message)
         }
     };
     
