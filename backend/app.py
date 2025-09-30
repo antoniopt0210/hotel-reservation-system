@@ -65,7 +65,7 @@ def create_reservation():
         # Validate check-in and check-out dates
         is_valid, message = validate_reservation_dates(data['check_in_date'], data['check_out_date'])
         if not is_valid:
-            raise ValueError(message)
+            raise ValueError({"error": message})
 
         cursor.execute(
             '''
