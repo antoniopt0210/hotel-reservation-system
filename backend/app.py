@@ -1,6 +1,7 @@
 from flask import Flask, request, g, jsonify
 from flask_cors import CORS
 import sqlite3
+import datetime
 
 # Create Flask application instance
 app = Flask(__name__)
@@ -50,11 +51,6 @@ def init_db():
 
 init_db()
 
-# Define a route for the root URL ('/')
-@app.route('/')
-def home():
-    return "Hello, Ant"
-
 # Create reservation
 @app.route('/api/reservations', methods=['POST'])
 def create_reservation():
@@ -65,6 +61,11 @@ def create_reservation():
         
         db = get_db_connection()
         cursor = db.cursor()
+
+        # Validate check-in and check-out dates
+        is_valid, message = validate_reservation_dates(data['check_in_date'], data['check_out_date'])
+        if not is_valid:
+            raise ValueError(message)
 
         cursor.execute(
             '''
@@ -158,6 +159,19 @@ def update_or_delete_reservation(reservation_id):
             return {"message": "Reservation deleted successfully"}, 200
         except Exception as e:
             return {"error": f"An error occurred: {str(e)}"}, 500
+
+def validate_reservation_dates(checkin, checkout):
+    now = datetime.datetime.now().date()
+    checkin_date = datetime.datetime.strptime(checkin, '%Y-%m-%d').date()
+    checkout_date = datetime.datetime.strptime(checkout, '%Y-%m-%d').date()
+
+    if checkin_date < now or checkout_date < now:
+        return False, "Check-in and check-out dates must be in the future."
+    if checkout_date <= checkin_date:
+        return False, "Check-out date must be after check-in date."
+    
+    return True, ""
+
 
 # Run app
 if __name__ == "__main__":
