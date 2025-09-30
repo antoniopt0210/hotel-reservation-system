@@ -65,7 +65,7 @@ def create_reservation():
         # Validate check-in and check-out dates
         is_valid, message = validate_reservation_dates(data['check_in_date'], data['check_out_date'])
         if not is_valid:
-            raise ValueError({"error": message})
+            raise ValueError(message)
 
         cursor.execute(
             '''
@@ -97,6 +97,8 @@ def create_reservation():
         return {"message": "Reservation Booked!", "reservation": data}, 201
     except KeyError as e:
         return {"error": f"Missing required field: {str(e)}"}, 400
+    except ValueError as e:
+        return {"error": str(e)}, 400
     except Exception as e:
         return {"error": f"An unexpected error occurred: {str(e)}"}, 500
 
