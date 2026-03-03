@@ -24,6 +24,6 @@ Cancel Reservation: A function to permanently delete reservations from the syste
 
 - Flask: A lightweight micro-framework for building a RESTful API.
 
-- SQLite: A serverless, file-based database for managing data persistence.
+- NoSQL Cassandra: A distributed NoSQL database built for high availability and horizontal scaling.
 
 - Flask-CORS: To handle Cross-Origin Resource Sharing and enable frontend/backend communication.
