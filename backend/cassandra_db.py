@@ -8,7 +8,12 @@ from cassandra.cluster import Cluster
 from cassandra.auth import PlainTextAuthProvider
 
 # Configuration - use environment variables for flexibility
-KEYSPACE = os.environ.get('CASSANDRA_KEYSPACE', os.environ.get('ASTRA_DB_KEYSPACE', 'hotel'))
+# Astra Serverless provides default_keyspace; use it when no keyspace is specified
+KEYSPACE = (
+    os.environ.get('CASSANDRA_KEYSPACE') or
+    os.environ.get('ASTRA_DB_KEYSPACE') or
+    ('default_keyspace' if os.environ.get('ASTRA_DB_APPLICATION_TOKEN') else 'hotel')
+)
 
 # Astra (cloud) - set these for production deployment
 ASTRA_TOKEN = os.environ.get('ASTRA_DB_APPLICATION_TOKEN')
@@ -51,11 +56,15 @@ def init_schema():
     """Create keyspace and reservations table if they don't exist."""
     session = _session
     
-    # Create keyspace with SimpleStrategy for single-node or small clusters
-    session.execute(f"""
-        CREATE KEYSPACE IF NOT EXISTS {KEYSPACE}
-        WITH replication = {{'class': 'SimpleStrategy', 'replication_factor': 1}}
-    """)
+    # Create keyspace - only works for local Cassandra (Astra Serverless doesn't support CQL CREATE KEYSPACE)
+    if not (ASTRA_TOKEN and ASTRA_SECURE_BUNDLE):
+        try:
+            session.execute(f"""
+                CREATE KEYSPACE IF NOT EXISTS {KEYSPACE}
+                WITH replication = {{'class': 'SimpleStrategy', 'replication_factor': 1}}
+            """)
+        except Exception:
+            pass
     
     session.set_keyspace(KEYSPACE)
     

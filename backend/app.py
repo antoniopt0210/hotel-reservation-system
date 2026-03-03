@@ -7,6 +7,7 @@ from cassandra_db import (
     get_all_reservations,
     update_reservation_status,
     delete_reservation,
+    get_session,
 )
 
 # Create Flask application instance
@@ -14,6 +15,33 @@ app = Flask(__name__)
 
 # enable CORS for all routes and origin
 CORS(app)
+
+
+# Health check - no DB required (for Render port detection)
+@app.route('/')
+@app.route('/api/health')
+def health():
+    return jsonify({"status": "ok", "message": "Hotel Reservation API"}), 200
+
+
+# Connection check - verifies Render can reach Astra
+@app.route('/api/db-check')
+def db_check():
+    """Test if the app can connect to Cassandra/Astra. Use this to verify Render → Astra connectivity."""
+    try:
+        session = get_session()
+        # Run a simple query to verify connection
+        session.execute("SELECT release_version FROM system.local")
+        return jsonify({
+            "status": "connected",
+            "message": "Successfully connected to Cassandra/Astra",
+        }), 200
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": "Failed to connect to Cassandra/Astra",
+            "error": str(e),
+        }), 503
 
 
 # Create reservation
@@ -32,11 +60,11 @@ def create_reservation():
         reservation = db_create_reservation(data)
         return {"message": "Reservation Booked!", "reservation": reservation}, 201
     except KeyError as e:
-        return {"error": f"Missing required field: {str(e)}"}, 400
+        return jsonify({"error": f"Missing required field: {str(e)}"}), 400
     except ValueError as e:
-        return {"error": str(e)}, 400
+        return jsonify({"error": str(e)}), 400
     except Exception as e:
-        return {"error": f"An unexpected error occurred: {str(e)}"}, 500
+        return jsonify({"error": f"An unexpected error occurred: {str(e)}"}), 500
 
 
 # Retrieve all reservations
@@ -46,7 +74,7 @@ def get_reservations():
         reservations_list = get_all_reservations()
         return jsonify({"reservations": reservations_list}), 200
     except Exception as e:
-        return {"error": f"An error occurred: {str(e)}"}, 500
+        return jsonify({"error": f"An error occurred: {str(e)}"}), 500
 
 
 # Modify an existing reservation
@@ -58,18 +86,18 @@ def update_or_delete_reservation(reservation_id):
             new_status = data.get('status')
 
             if not update_reservation_status(reservation_id, new_status):
-                return {"message": "Reservation not found"}, 404
-            return {"message": "Reservation modified successfully"}, 200
+                return jsonify({"message": "Reservation not found"}), 404
+            return jsonify({"message": "Reservation modified successfully"}), 200
         except Exception as e:
-            return {"error": f"An error occurred: {str(e)}"}, 500
+            return jsonify({"error": f"An error occurred: {str(e)}"}), 500
 
     elif request.method == 'DELETE':
         try:
             if not delete_reservation(reservation_id):
-                return {"message": "Reservation not found"}, 404
-            return {"message": "Reservation deleted successfully"}, 200
+                return jsonify({"message": "Reservation not found"}), 404
+            return jsonify({"message": "Reservation deleted successfully"}), 200
         except Exception as e:
-            return {"error": f"An error occurred: {str(e)}"}, 500
+            return jsonify({"error": f"An error occurred: {str(e)}"}), 500
 
 
 def validate_reservation_dates(checkin, checkout):

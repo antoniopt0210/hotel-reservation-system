@@ -38,7 +38,7 @@ Astra is a managed Cassandra service with a free tier. Ideal for demos and produ
 
 1. **Create an Astra database** at [astra.datastax.com](https://astra.datastax.com)
    - Create a new database (free tier)
-   - Create a keyspace named `hotel` (or note a different name for step 4)
+   - Astra provides `default_keyspace` automatically — no need to create one
 
 2. **Download the Secure Connect Bundle**
    - In your Astra dashboard → Database → Connect
@@ -55,7 +55,7 @@ Astra is a managed Cassandra service with a free tier. Ideal for demos and produ
    - Connect your repo and deploy the backend
    - Add environment variables:
      - `ASTRA_DB_APPLICATION_TOKEN`: Your token from step 3
-     - `ASTRA_DB_KEYSPACE`: `hotel` (if you used a different keyspace name)
+     - `ASTRA_DB_KEYSPACE`: Optional — defaults to `default_keyspace` (use `hotel` if you created a custom keyspace)
    - The bundle in `backend/` is used automatically
 
 ## Option B: Local Cassandra (Development)
