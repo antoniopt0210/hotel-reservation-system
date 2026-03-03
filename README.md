@@ -24,6 +24,56 @@ Cancel Reservation: A function to permanently delete reservations from the syste
 
 - Flask: A lightweight micro-framework for building a RESTful API.
 
-- SQLite: A serverless, file-based database for managing data persistence.
+- Apache Cassandra: A distributed NoSQL database for scalable data persistence.
 
 - Flask-CORS: To handle Cross-Origin Resource Sharing and enable frontend/backend communication.
+
+# Cassandra Setup
+
+The backend supports **local Cassandra** (development) and **DataStax Astra** (cloud deployment).
+
+## Option A: DataStax Astra (Recommended for hosting online)
+
+Astra is a managed Cassandra service with a free tier. Ideal for demos and production.
+
+1. **Create an Astra database** at [astra.datastax.com](https://astra.datastax.com)
+   - Create a new database (free tier)
+   - Create a keyspace named `hotel` (or note a different name for step 4)
+
+2. **Download the Secure Connect Bundle**
+   - In your Astra dashboard → Database → Connect
+   - Download the Secure Connect Bundle (ZIP file)
+   - Rename it to `secure-connect-bundle.zip` and place it in the `backend/` folder
+   - The bundle is safe to commit (contains connection info; your token is the secret)
+
+3. **Create an Application Token**
+   - Astra dashboard → Organization Settings → Token Management
+   - Generate a token with **Database Administrator** role
+   - Copy the token (starts with `AstraCS:...`)
+
+4. **Deploy to Render** (or similar)
+   - Connect your repo and deploy the backend
+   - Add environment variables:
+     - `ASTRA_DB_APPLICATION_TOKEN`: Your token from step 3
+     - `ASTRA_DB_KEYSPACE`: `hotel` (if you used a different keyspace name)
+   - The bundle in `backend/` is used automatically
+
+## Option B: Local Cassandra (Development)
+
+1. **Install Cassandra** (e.g., via Docker):
+   ```bash
+   docker run -d -p 9042:9042 --name cassandra cassandra:latest
+   ```
+   Note: Cassandra may take 30-60 seconds to become ready after starting.
+
+2. **Configure connection** (optional - defaults work for localhost):
+   - `CASSANDRA_HOSTS`: Comma-separated host list (default: `127.0.0.1`)
+   - `CASSANDRA_PORT`: Port number (default: `9042`)
+   - `CASSANDRA_KEYSPACE`: Keyspace name (default: `hotel`)
+
+3. **Install Python dependencies and run**:
+   ```bash
+   cd backend && pip install -r requirements.txt && python app.py
+   ```
+
+The keyspace and table are created automatically on first request.
