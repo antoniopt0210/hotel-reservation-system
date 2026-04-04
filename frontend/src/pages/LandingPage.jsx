@@ -1,8 +1,10 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import useSearchStore from '../store/searchStore';
 import Button from '../components/common/Button';
 import SearchAutocomplete from '../components/search/SearchAutocomplete';
+import StarRating from '../components/common/StarRating';
+import { useRecentlyViewed } from '../hooks/useRecentlyViewed';
 
 const FEATURED_CITIES = [
   { city: 'New York',    img: 'https://picsum.photos/seed/nyc/400/260' },
@@ -16,6 +18,7 @@ const FEATURED_CITIES = [
 const LandingPage = () => {
   const navigate = useNavigate();
   const { setSearchParams } = useSearchStore();
+  const { items: recentlyViewed } = useRecentlyViewed();
 
   const today = new Date().toISOString().split('T')[0];
   const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
@@ -109,6 +112,41 @@ const LandingPage = () => {
           ))}
         </div>
       </section>
+
+      {/* Recently viewed */}
+      {recentlyViewed.length > 0 && (
+        <section className="max-w-6xl mx-auto px-4 pb-8">
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">Recently viewed</h2>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {recentlyViewed.slice(0, 4).map(h => (
+              <Link
+                key={h.id}
+                to={`/hotels/${h.slug}`}
+                className="bg-white rounded-xl shadow hover:shadow-md transition overflow-hidden"
+              >
+                <img
+                  src={h.photo || 'https://picsum.photos/seed/default/400/260'}
+                  alt={h.name}
+                  className="w-full h-32 object-cover"
+                />
+                <div className="p-3">
+                  <h3 className="font-semibold text-gray-800 text-sm truncate">{h.name}</h3>
+                  <div className="flex items-center gap-1 mt-1">
+                    <StarRating rating={h.star_rating} size="sm" />
+                    {h.avg_rating && (
+                      <span className="text-xs bg-blue-600 text-white px-1 rounded">{h.avg_rating.toFixed(1)}</span>
+                    )}
+                  </div>
+                  <p className="text-xs text-gray-400 mt-1">{h.city}, {h.country}</p>
+                  {h.min_price && (
+                    <p className="text-sm font-bold text-blue-600 mt-1">From ${h.min_price}/night</p>
+                  )}
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Why StayEasy */}
       <section className="bg-blue-50 py-14">

@@ -8,7 +8,9 @@ import ReviewList from '../components/reviews/ReviewList';
 import ReviewForm from '../components/reviews/ReviewForm';
 import WishlistButton from '../components/common/WishlistButton';
 import LocationMap from '../components/hotel/LocationMap';
+import PhotoGalleryModal from '../components/hotel/PhotoGalleryModal';
 import useAuthStore from '../store/authStore';
+import { addRecentlyViewed } from '../hooks/useRecentlyViewed';
 
 const HotelDetailPage = () => {
   const { slug }            = useParams();
@@ -26,6 +28,7 @@ const HotelDetailPage = () => {
   const [loading, setLoading]       = useState(true);
   const [error, setError]           = useState(null);
   const [showReviewForm, setShowReviewForm] = useState(false);
+  const [galleryIndex, setGalleryIndex]     = useState(null);
 
   useEffect(() => {
     setLoading(true);
@@ -36,6 +39,7 @@ const HotelDetailPage = () => {
       .then(([hotelData, roomData]) => {
         setHotel(hotelData.hotel);
         setRooms(roomData.rooms);
+        addRecentlyViewed(hotelData.hotel);
       })
       .catch(() => setError('Failed to load hotel details.'))
       .finally(() => setLoading(false));
@@ -55,18 +59,28 @@ const HotelDetailPage = () => {
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-8">
+      {/* Photo gallery modal */}
+      {galleryIndex !== null && (
+        <PhotoGalleryModal photos={photos} initialIndex={galleryIndex} onClose={() => setGalleryIndex(null)} />
+      )}
+
       {/* Photo gallery */}
       <div className="rounded-xl overflow-hidden mb-6">
-        <div className="relative">
+        <div className="relative cursor-pointer" onClick={() => setGalleryIndex(heroIndex)}>
           <img src={photos[heroIndex]?.url} alt={photos[heroIndex]?.caption || hotel.name}
             className="w-full h-80 object-cover" />
           {photos.length > 1 && (
+            <span className="absolute bottom-3 right-3 bg-black/60 text-white text-xs px-2 py-1 rounded">
+              {photos.length} photos
+            </span>
+          )}
+          {photos.length > 1 && (
             <>
-              <button onClick={() => setHeroIndex(i => (i - 1 + photos.length) % photos.length)}
+              <button onClick={(e) => { e.stopPropagation(); setHeroIndex(i => (i - 1 + photos.length) % photos.length); }}
                 className="absolute left-3 top-1/2 -translate-y-1/2 bg-black/50 text-white rounded-full w-9 h-9 flex items-center justify-center hover:bg-black/70">
                 ‹
               </button>
-              <button onClick={() => setHeroIndex(i => (i + 1) % photos.length)}
+              <button onClick={(e) => { e.stopPropagation(); setHeroIndex(i => (i + 1) % photos.length); }}
                 className="absolute right-3 top-1/2 -translate-y-1/2 bg-black/50 text-white rounded-full w-9 h-9 flex items-center justify-center hover:bg-black/70">
                 ›
               </button>
