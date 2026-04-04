@@ -16,3 +16,6 @@ export const fetchBooking = (id) =>
 
 export const cancelBooking = (id, reason = '') =>
   client.put(`/api/v1/bookings/${id}/cancel`, { reason }).then(r => r.data);
+
+export const testConfirmBooking = (payload) =>
+  client.post('/api/v1/bookings/test-confirm', payload).then(r => r.data);

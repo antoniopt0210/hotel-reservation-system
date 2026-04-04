@@ -167,6 +167,61 @@ def confirm_booking():
 
 
 # ---------------------------------------------------------------------------
+# Test mode — skip Stripe, create booking directly
+# ---------------------------------------------------------------------------
+
+@bookings_bp.route('/test-confirm', methods=['POST'])
+@jwt_required()
+def test_confirm_booking():
+    """Create a booking without Stripe payment. Only works when STRIPE_SECRET_KEY
+    starts with 'sk_test_' or is empty (development/test environments)."""
+    key = os.environ.get('STRIPE_SECRET_KEY', '')
+    if key and not key.startswith('sk_test_'):
+        return jsonify({"error": "Test bookings are only allowed in test/dev mode."}), 403
+
+    data      = request.get_json() or {}
+    room_id   = data.get('room_id')
+    check_in  = data.get('check_in')
+    check_out = data.get('check_out')
+
+    if not all([room_id, check_in, check_out]):
+        return jsonify({"error": "room_id, check_in, check_out required."}), 400
+
+    room = Room.query.get(room_id)
+    if not room:
+        return jsonify({"error": "Room not found."}), 404
+
+    ci = datetime.date.fromisoformat(check_in)
+    co = datetime.date.fromisoformat(check_out)
+    pricing = calculate_price(room, ci, co)
+
+    booking = Booking(
+        user_id           = get_jwt_identity(),
+        room_id           = room_id,
+        hotel_id          = room.hotel_id,
+        check_in_date     = ci,
+        check_out_date    = co,
+        guest_first_name  = data.get('first_name', ''),
+        guest_last_name   = data.get('last_name', ''),
+        guest_email       = data.get('email', ''),
+        num_guests        = data.get('num_guests', 1),
+        special_requests  = data.get('special_requests'),
+        total_price_usd   = pricing['total'],
+        stripe_payment_id = 'TEST_MODE_NO_PAYMENT',
+        status            = 'confirmed',
+    )
+    db.session.add(booking)
+    db.session.commit()
+
+    try:
+        decrement_room_availability(room_id, ci, co, room.total_units)
+    except Exception as e:
+        print(f"[availability] Failed to decrement: {e}")
+
+    return jsonify({"booking": booking.to_dict()}), 201
+
+
+# ---------------------------------------------------------------------------
 # Read bookings
 # ---------------------------------------------------------------------------
 

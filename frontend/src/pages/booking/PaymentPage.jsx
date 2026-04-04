@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { loadStripe } from '@stripe/stripe-js';
-import { createPaymentIntent, confirmBooking } from '../../api/bookings';
+import { createPaymentIntent, confirmBooking, testConfirmBooking } from '../../api/bookings';
 import PriceBreakdown from '../../components/booking/PriceBreakdown';
 import Button from '../../components/common/Button';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
@@ -13,7 +13,6 @@ const PaymentPage = () => {
   const navigate       = useNavigate();
 
   const roomId    = searchParams.get('room_id');
-  const hotelSlug = searchParams.get('hotel_slug');
   const checkIn   = searchParams.get('check_in');
   const checkOut  = searchParams.get('check_out');
   const guests    = Number(searchParams.get('guests') || 1);
@@ -27,9 +26,9 @@ const PaymentPage = () => {
   const [submitting, setSubmitting]   = useState(false);
   const [error, setError]             = useState('');
 
-  const cardRef     = useRef(null);   // DOM node for Stripe to mount into
-  const stripeRef   = useRef(null);   // stripe instance
-  const cardElRef   = useRef(null);   // card Element instance
+  const cardRef     = useRef(null);
+  const stripeRef   = useRef(null);
+  const cardElRef   = useRef(null);
 
   // Step 1 — fetch PaymentIntent from backend
   useEffect(() => {
@@ -83,7 +82,6 @@ const PaymentPage = () => {
       return;
     }
 
-    // Payment succeeded — confirm with backend
     try {
       const data = await confirmBooking({
         payment_intent_id: intentData.payment_intent_id,
@@ -103,12 +101,39 @@ const PaymentPage = () => {
     }
   };
 
+  const handleTestBooking = async () => {
+    setError('');
+    setSubmitting(true);
+    try {
+      const data = await testConfirmBooking({
+        room_id:          roomId,
+        check_in:         checkIn,
+        check_out:        checkOut,
+        first_name:       firstName,
+        last_name:        lastName,
+        email,
+        num_guests:       guests,
+        special_requests: requests,
+      });
+      navigate(`/booking/confirmation/${data.booking.id}`);
+    } catch (err) {
+      setError(err.response?.data?.error || 'Test booking failed.');
+      setSubmitting(false);
+    }
+  };
+
   if (pageLoading) return <LoadingSpinner className="py-32" size="lg" />;
 
   if (error && !intentData) return (
     <div className="max-w-xl mx-auto px-4 py-20 text-center">
       <p className="text-red-500 mb-4">{error}</p>
-      <Button variant="secondary" onClick={() => navigate(-1)}>Go back</Button>
+      <div className="flex flex-col gap-3 items-center">
+        <Button variant="secondary" onClick={() => navigate(-1)}>Go back</Button>
+        <p className="text-sm text-gray-400">Or skip payment entirely:</p>
+        <Button variant="success" onClick={handleTestBooking} disabled={submitting}>
+          {submitting ? 'Booking...' : 'Book Without Payment (Test Mode)'}
+        </Button>
+      </div>
     </div>
   );
 
@@ -128,6 +153,15 @@ const PaymentPage = () => {
         <form onSubmit={handleSubmit} className="md:col-span-3 space-y-4">
           <h1 className="text-2xl font-bold text-gray-800">Payment</h1>
 
+          {/* Test mode hint */}
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-sm">
+            <p className="font-semibold text-yellow-800 mb-1">Test Mode</p>
+            <p className="text-yellow-700">
+              Use card <span className="font-mono font-bold">4242 4242 4242 4242</span>,
+              any future expiry, any CVC & ZIP.
+            </p>
+          </div>
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Card details</label>
             <div
@@ -143,11 +177,29 @@ const PaymentPage = () => {
           )}
 
           <p className="text-xs text-gray-400">
-            🔒 Your payment is secured by Stripe. We never store your card details.
+            Your payment is secured by Stripe. We never store your card details.
           </p>
 
           <Button type="submit" className="w-full" disabled={submitting || !intentData}>
-            {submitting ? 'Processing…' : `Pay $${intentData?.pricing?.total?.toFixed(2) ?? '...'}`}
+            {submitting ? 'Processing...' : `Pay $${intentData?.pricing?.total?.toFixed(2) ?? '...'}`}
+          </Button>
+
+          {/* Divider */}
+          <div className="flex items-center gap-3 py-1">
+            <div className="flex-1 border-t" />
+            <span className="text-xs text-gray-400">OR</span>
+            <div className="flex-1 border-t" />
+          </div>
+
+          {/* Skip payment button */}
+          <Button
+            type="button"
+            variant="secondary"
+            className="w-full"
+            disabled={submitting}
+            onClick={handleTestBooking}
+          >
+            {submitting ? 'Booking...' : 'Skip Payment (Test Mode)'}
           </Button>
         </form>
 
