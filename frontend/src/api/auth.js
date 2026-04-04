@@ -14,3 +14,6 @@ export const logout = () =>
 
 export const getMe = () =>
   client.get('/api/v1/auth/me').then((r) => r.data);
+
+export const updateProfile = (data) =>
+  client.put('/api/v1/auth/me', data).then((r) => r.data);

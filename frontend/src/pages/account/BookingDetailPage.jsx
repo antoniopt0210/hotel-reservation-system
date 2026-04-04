@@ -3,10 +3,12 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { fetchBooking, cancelBooking } from '../../api/bookings';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import Button from '../../components/common/Button';
+import { useToast } from '../../components/common/Toast';
 
 const BookingDetailPage = () => {
   const { bookingId } = useParams();
   const navigate      = useNavigate();
+  const toast         = useToast();
   const [booking, setBooking] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -20,9 +22,10 @@ const BookingDetailPage = () => {
     if (!window.confirm('Cancel this booking?')) return;
     try {
       await cancelBooking(bookingId);
+      toast('Booking cancelled successfully', 'success');
       navigate('/account/bookings');
     } catch (err) {
-      alert(err.response?.data?.error || 'Cancellation failed.');
+      toast(err.response?.data?.error || 'Cancellation failed.', 'error');
     }
   };
 
@@ -68,11 +71,14 @@ const BookingDetailPage = () => {
           </div>
         )}
 
-        {/* Review prompt — Phase 4 */}
-        {booking.status === 'checked_out' && (
-          <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 text-sm text-blue-700">
-            How was your stay? Review functionality coming in Phase 4.
-          </div>
+        {/* Review prompt */}
+        {(booking.status === 'checked_out' || booking.status === 'confirmed') && booking.hotel_slug && (
+          <Link
+            to={`/hotels/${booking.hotel_slug}`}
+            className="block bg-blue-50 border border-blue-200 rounded-xl p-4 text-sm text-blue-700 hover:bg-blue-100 transition"
+          >
+            How was your stay? Leave a review →
+          </Link>
         )}
 
         <div className="flex gap-3 pt-2 flex-wrap">

@@ -87,3 +87,30 @@ def me():
     if not user:
         return jsonify({"error": "User not found"}), 404
     return jsonify({"user": user.to_dict()}), 200
+
+
+@auth_bp.route('/me', methods=['PUT'])
+@jwt_required()
+def update_profile():
+    user = User.query.get(get_jwt_identity())
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    data = request.get_json() or {}
+
+    if 'first_name' in data and data['first_name'].strip():
+        user.first_name = data['first_name'].strip()
+    if 'last_name' in data and data['last_name'].strip():
+        user.last_name = data['last_name'].strip()
+    if 'phone' in data:
+        user.phone = data['phone'].strip() or None
+
+    if data.get('new_password'):
+        if not data.get('current_password'):
+            return jsonify({"error": "Current password is required"}), 400
+        if not bcrypt.checkpw(data['current_password'].encode(), user.password_hash.encode()):
+            return jsonify({"error": "Current password is incorrect"}), 401
+        user.password_hash = bcrypt.hashpw(data['new_password'].encode(), bcrypt.gensalt()).decode()
+
+    db.session.commit()
+    return jsonify({"user": user.to_dict(), "message": "Profile updated"}), 200

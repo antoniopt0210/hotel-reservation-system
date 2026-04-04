@@ -14,7 +14,9 @@ const Navbar = () => {
         <div className="flex items-center gap-4 text-sm">
           {user ? (
             <>
-              <span className="opacity-80">Hi, {user.first_name}</span>
+              <Link to="/account/profile" className="opacity-80 hover:opacity-100 hover:underline">
+                Hi, {user.first_name}
+              </Link>
               <Link to="/account/wishlist" className="hover:underline">
                 Wishlist
               </Link>

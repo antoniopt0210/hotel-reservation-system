@@ -4,6 +4,7 @@ import { fetchHotels, fetchAmenities } from '../api/hotels';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import StarRating from '../components/common/StarRating';
 import WishlistButton from '../components/common/WishlistButton';
+import MobileFilterDrawer from '../components/search/MobileFilterDrawer';
 
 const SearchResultsPage = () => {
   const [searchParams] = useSearchParams();
@@ -114,12 +115,23 @@ const SearchResultsPage = () => {
           <p className="text-gray-600 text-sm">
             {loading ? 'Searching…' : `${total} propert${total === 1 ? 'y' : 'ies'} found${city ? ` in ${city}` : ''}`}
           </p>
-          <select value={sort} onChange={e => { setSort(e.target.value); setPage(1); }}
-            className="border rounded px-3 py-1 text-sm">
-            <option value="rating_desc">Top rated</option>
-            <option value="price_asc">Price: low to high</option>
-            <option value="price_desc">Price: high to low</option>
-          </select>
+          <div className="flex items-center gap-2">
+            <MobileFilterDrawer
+              amenities={amenities}
+              minPrice={minPrice} setMinPrice={v => { setMinPrice(v); setPage(1); }}
+              maxPrice={maxPrice} setMaxPrice={v => { setMaxPrice(v); setPage(1); }}
+              selectedStars={selectedStars} toggleStar={s => { toggleStar(s); setPage(1); }}
+              selectedAmenities={selectedAmenities} toggleAmenity={id => { toggleAmenity(id); setPage(1); }}
+              sort={sort} setSort={v => { setSort(v); setPage(1); }}
+              onApply={() => setPage(1)}
+            />
+            <select value={sort} onChange={e => { setSort(e.target.value); setPage(1); }}
+              className="hidden md:block border rounded px-3 py-1 text-sm">
+              <option value="rating_desc">Top rated</option>
+              <option value="price_asc">Price: low to high</option>
+              <option value="price_desc">Price: high to low</option>
+            </select>
+          </div>
         </div>
 
         {error && <p className="text-red-500 py-4">{error}</p>}
