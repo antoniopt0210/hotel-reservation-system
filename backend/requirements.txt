@@ -1,4 +1,33 @@
+# Core
 Flask
 Flask-CORS
 gunicorn
+
+# Cassandra
 cassandra-driver
+
+# Auth (Phase 2)
+flask-jwt-extended
+bcrypt
+
+# PostgreSQL (Phase 2)
+flask-sqlalchemy
+psycopg2-binary
+
+# Serialization (Phase 2)
+marshmallow
+
+# Payments (Phase 3)
+stripe
+
+# Email (Phase 3)
+flask-mail
+
+# Background jobs (Phase 3)
+APScheduler
+
+# Redis (Phase 3)
+redis
+
+# Dev utilities
+python-dotenv
