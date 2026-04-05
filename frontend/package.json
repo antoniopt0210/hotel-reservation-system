@@ -23,7 +23,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "predeploy": "npm run build",
+    "predeploy": "node -e \"const fs=require('fs');if(fs.existsSync('.env.local')){fs.renameSync('.env.local','.env.local.bak')}\" && npm run build && node -e \"const fs=require('fs');if(fs.existsSync('.env.local.bak')){fs.renameSync('.env.local.bak','.env.local')}\"",
     "deploy": "gh-pages -d build"
   },
   "eslintConfig": {
