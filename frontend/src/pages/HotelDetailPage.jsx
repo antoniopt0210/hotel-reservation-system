@@ -100,6 +100,37 @@ const HotelDetailPage = () => {
         )}
       </div>
 
+      {/* Mobile date/guest picker — visible only on small screens */}
+      <div className="lg:hidden bg-white border rounded-xl shadow p-4 mb-6">
+        <div className="grid grid-cols-3 gap-2">
+          <div>
+            <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Check-in</label>
+            <input
+              type="date" value={checkIn} min={today}
+              onChange={e => { setCheckIn(e.target.value); if (e.target.value >= checkOut) setCheckOut(''); }}
+              className="w-full border border-gray-300 rounded-md px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Check-out</label>
+            <input
+              type="date" value={checkOut} min={checkIn || today}
+              onChange={e => setCheckOut(e.target.value)}
+              className="w-full border border-gray-300 rounded-md px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Guests</label>
+            <input
+              type="number" min={1} max={16} value={guests}
+              onChange={e => setGuests(Number(e.target.value))}
+              className="w-full border border-gray-300 rounded-md px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+          </div>
+        </div>
+        <p className="text-xs text-blue-600 font-medium mt-2">{nights} night{nights !== 1 ? 's' : ''}</p>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Left: hotel info */}
         <div className="lg:col-span-2 space-y-6">
@@ -164,9 +195,9 @@ const HotelDetailPage = () => {
           </div>
         </div>
 
-        {/* Right: booking info + map */}
+        {/* Right: booking info + map — hidden on mobile (shown above instead) */}
         <div className="space-y-4">
-          <div className="bg-white border rounded-xl shadow p-4 sticky top-4 space-y-3">
+          <div className="hidden lg:block bg-white border rounded-xl shadow p-4 sticky top-4 space-y-3">
             <div>
               <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Check-in</label>
               <input
