@@ -17,9 +17,12 @@ const HotelDetailPage = () => {
   const [searchParams]      = useSearchParams();
   const navigate            = useNavigate();
 
-  const checkIn  = searchParams.get('check_in')  || '';
-  const checkOut = searchParams.get('check_out') || '';
-  const guests   = searchParams.get('guests')    || 1;
+  const today = new Date().toISOString().split('T')[0];
+  const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
+
+  const [checkIn, setCheckIn]   = useState(searchParams.get('check_in')  || today);
+  const [checkOut, setCheckOut] = useState(searchParams.get('check_out') || tomorrow);
+  const [guests, setGuests]     = useState(Number(searchParams.get('guests')) || 1);
 
   const { user }                    = useAuthStore();
   const [hotel, setHotel]           = useState(null);
@@ -163,13 +166,33 @@ const HotelDetailPage = () => {
 
         {/* Right: booking info + map */}
         <div className="space-y-4">
-          <div className="bg-white border rounded-xl shadow p-4 sticky top-4">
-            <p className="text-sm text-gray-500 mb-1">Check-in / Check-out</p>
-            <p className="font-semibold text-gray-800">
-              {checkIn || '—'} → {checkOut || '—'}
-            </p>
-            <p className="text-sm text-gray-500 mt-2">{guests} guest{guests > 1 ? 's' : ''} · {nights} night{nights !== 1 ? 's' : ''}</p>
-            <p className="text-xs text-gray-400 mt-1">
+          <div className="bg-white border rounded-xl shadow p-4 sticky top-4 space-y-3">
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Check-in</label>
+              <input
+                type="date" value={checkIn} min={today}
+                onChange={e => { setCheckIn(e.target.value); if (e.target.value >= checkOut) setCheckOut(''); }}
+                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Check-out</label>
+              <input
+                type="date" value={checkOut} min={checkIn || today}
+                onChange={e => setCheckOut(e.target.value)}
+                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Guests</label>
+              <input
+                type="number" min={1} max={16} value={guests}
+                onChange={e => setGuests(Number(e.target.value))}
+                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+              />
+            </div>
+            <p className="text-sm text-blue-600 font-medium">{nights} night{nights !== 1 ? 's' : ''}</p>
+            <p className="text-xs text-gray-400">
               Check-in: {hotel.check_in_time} · Check-out: {hotel.check_out_time}
             </p>
           </div>
