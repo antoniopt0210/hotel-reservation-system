@@ -6,6 +6,45 @@ A full-stack hotel booking platform inspired by Booking.com. Search 200+ hotels 
 
 ---
 
+## Tech Stack
+
+### Frontend
+| Technology | Purpose |
+|------------|---------|
+| **React 19** | UI framework |
+| **React Router v6** | Client-side routing (HashRouter for GitHub Pages) |
+| **TanStack Query** | Server state management, caching, pagination |
+| **Zustand** | Client state (auth, search) |
+| **Axios** | HTTP client with JWT interceptor |
+| **Tailwind CSS** (CDN) | Utility-first styling |
+| **Stripe.js** | Secure payment card element |
+
+### Backend
+| Technology | Purpose |
+|------------|---------|
+| **Python / Flask** | REST API with app factory pattern and Blueprints |
+| **PostgreSQL** (Supabase) | Relational data — users, hotels, rooms, bookings, reviews, wishlist |
+| **SQLAlchemy** | ORM with auto-migration via `db.create_all()` |
+| **Apache Cassandra** (DataStax Astra) | Room availability calendar, per-night pricing overrides |
+| **Redis** (Upstash) | Booking locks to prevent double-reservation |
+| **Stripe** | Payment intent creation and server-side verification |
+| **Flask-Mail** (SendGrid) | Transactional emails (confirmation, reminders, cancellation) |
+| **Flask-JWT-Extended** | JWT access + refresh token authentication |
+| **bcrypt** | Password hashing |
+| **APScheduler** | Daily check-in reminder cron job |
+| **Gunicorn** | Production WSGI server |
+
+### Infrastructure
+| Service | Purpose |
+|---------|---------|
+| **Render** | Backend hosting (Python 3.11) |
+| **GitHub Pages** | Frontend hosting (static SPA) |
+| **Supabase** | Managed PostgreSQL |
+| **DataStax Astra** | Managed Cassandra |
+| **Upstash** | Managed Redis |
+
+---
+
 ## Features
 
 ### Discovery & Search
@@ -52,45 +91,6 @@ A full-stack hotel booking platform inspired by Booking.com. Search 200+ hotels 
 - **Error boundary** for crash recovery
 - **404 page** for unknown routes
 - **Recently viewed hotels** persisted in localStorage
-
----
-
-## Tech Stack
-
-### Frontend
-| Technology | Purpose |
-|------------|---------|
-| **React 19** | UI framework |
-| **React Router v6** | Client-side routing (HashRouter for GitHub Pages) |
-| **TanStack Query** | Server state management, caching, pagination |
-| **Zustand** | Client state (auth, search) |
-| **Axios** | HTTP client with JWT interceptor |
-| **Tailwind CSS** (CDN) | Utility-first styling |
-| **Stripe.js** | Secure payment card element |
-
-### Backend
-| Technology | Purpose |
-|------------|---------|
-| **Python / Flask** | REST API with app factory pattern and Blueprints |
-| **PostgreSQL** (Supabase) | Relational data — users, hotels, rooms, bookings, reviews, wishlist |
-| **SQLAlchemy** | ORM with auto-migration via `db.create_all()` |
-| **Apache Cassandra** (DataStax Astra) | Room availability calendar, per-night pricing overrides |
-| **Redis** (Upstash) | Booking locks to prevent double-reservation |
-| **Stripe** | Payment intent creation and server-side verification |
-| **Flask-Mail** (SendGrid) | Transactional emails (confirmation, reminders, cancellation) |
-| **Flask-JWT-Extended** | JWT access + refresh token authentication |
-| **bcrypt** | Password hashing |
-| **APScheduler** | Daily check-in reminder cron job |
-| **Gunicorn** | Production WSGI server |
-
-### Infrastructure
-| Service | Purpose |
-|---------|---------|
-| **Render** | Backend hosting (Python 3.11) |
-| **GitHub Pages** | Frontend hosting (static SPA) |
-| **Supabase** | Managed PostgreSQL |
-| **DataStax Astra** | Managed Cassandra |
-| **Upstash** | Managed Redis |
 
 ---
 
