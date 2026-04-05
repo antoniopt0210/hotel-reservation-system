@@ -46,22 +46,21 @@ def create_review(hotel_id):
     if not isinstance(rating, int) or rating < 1 or rating > 5:
         return jsonify({'error': 'rating must be an integer 1–5'}), 400
 
-    # Check the user has a checked_out booking at this hotel (or confirmed — allow early)
+    # One review per user per hotel
+    existing = Review.query.filter_by(hotel_id=hotel_id, user_id=user_id).first()
+    if existing:
+        return jsonify({'error': 'You have already reviewed this hotel'}), 409
+
+    # Link to a booking if the user has one (for "verified stay" context)
     booking = Booking.query.filter(
         Booking.hotel_id  == hotel_id,
         Booking.user_id   == user_id,
         Booking.status.in_(['confirmed', 'checked_in', 'checked_out']),
     ).first()
-    if not booking:
-        return jsonify({'error': 'You must have a booking at this hotel to leave a review'}), 403
-
-    # One review per booking
-    if booking.review:
-        return jsonify({'error': 'You have already reviewed this booking'}), 409
 
     review = Review(
         hotel_id   = hotel_id,
-        booking_id = booking.id,
+        booking_id = booking.id if booking else None,
         user_id    = user_id,
         rating     = rating,
         title      = (data.get('title') or '')[:120],
