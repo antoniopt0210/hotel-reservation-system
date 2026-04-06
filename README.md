@@ -68,7 +68,7 @@ A full-stack hotel booking platform inspired by Booking.com. Search 200+ hotels 
 - **Dynamic pricing** — weekend surcharges, seasonal multipliers, per-night overrides
 - **Price breakdown** with expandable nightly rate detail
 - **Redis locks** to prevent double-booking during checkout
-- **Email notifications** — booking confirmation, check-in reminders, cancellation
+- **Email notifications** — booking confirmation, check-in reminders, cancellation (coming soon)
 
 ### User Accounts
 - **JWT authentication** with access + refresh tokens
